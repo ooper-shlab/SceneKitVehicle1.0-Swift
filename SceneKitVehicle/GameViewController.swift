@@ -136,7 +136,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         floor.geometry!.firstMaterial!.diffuse.contentsTransform = SCNMatrix4MakeScale(2, 2, 1) //scale the wood texture
         floor.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
         if isHighEndDevice {
-            (floor.geometry as SCNFloor).reflectionFalloffEnd = 10
+            (floor.geometry as! SCNFloor).reflectionFalloffEnd = 10
         }
         
         let staticBody = SCNPhysicsBody.staticBody()
@@ -149,7 +149,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         //physicalize the train with simple boxes
         (trainScene.rootNode.childNodes as NSArray).enumerateObjectsUsingBlock {obj, idx, stop in
-            let node = obj as SCNNode
+            let node = obj as! SCNNode
             if node.geometry != nil {
                 node.position = SCNVector3Make(node.position.x + pos.x, node.position.y + pos.y, node.position.z + pos.z)
                 
@@ -240,12 +240,12 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         wall.physicsBody = SCNPhysicsBody.staticBody()
         scene.rootNode.addChildNode(wall)
         
-        let wallC = wall.clone() as SCNNode
+        let wallC = wall.clone() as! SCNNode
         wallC.position = SCNVector3Make(-202, 50, 0)
         wallC.rotation = SCNVector4Make(0, 1, 0, Float(π_2))
         scene.rootNode.addChildNode(wallC)
         
-        let wallD = wall.clone() as SCNNode
+        let wallD = wall.clone() as! SCNNode
         wallD.position = SCNVector3Make(202, 50, 0)
         wallD.rotation = SCNVector4Make(0, 1, 0, Float(-π_2))
         scene.rootNode.addChildNode(wallD)
@@ -424,7 +424,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         UIApplication.sharedApplication().statusBarHidden = true
         
-        let scnView = view as SCNView
+        let scnView = view as! SCNView
         
         //set the background to back
         scnView.backgroundColor = SKColor.blackColor()
@@ -462,7 +462,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     func handleDoubleTap(gesture: UITapGestureRecognizer) {
         let scene = setupScene()
         
-        let scnView = view as SCNView
+        let scnView = view as! SCNView
         //present it
         scnView.scene = scene
         
@@ -472,7 +472,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         //initial point of view
         scnView.pointOfView = _cameraNode
         
-        (scnView as GameView).touchCount = 0
+        (scnView as! GameView).touchCount = 0
     }
     
     // game logic
@@ -482,7 +482,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let steeringClamp: CGFloat = 0.6
         let cameraDamping: CGFloat = 0.3
         
-        let scnView = view as GameView
+        let scnView = view as! GameView
         
         var engineForce: CGFloat = 0
         var brakingForce: CGFloat = 0
@@ -508,7 +508,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         //controller support
         if controllers != nil && controllers.count > 0 {
-            let controller = controllers[0] as GCController
+            let controller = controllers[0] as! GCController
             let pad = controller.gamepad
             let dpad = pad.dpad
             
@@ -600,7 +600,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
         
         //speed gauge
-        let overlayScene = scnView.overlaySKScene as OverlayScene
+        let overlayScene = scnView.overlaySKScene as! OverlayScene
         overlayScene.speedNeedle.zRotation = -(_vehicle.speedInKilometersPerHour * CGFloat(π) / MAX_SPEED)
     }
     

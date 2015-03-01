@@ -20,7 +20,7 @@ import SpriteKit
 @objc(AAPLOverlayScene)
 class OverlayScene: SKScene {
     
-    let speedNeedle: SKNode!
+    private(set) var speedNeedle: SKNode!
     
     
     override init(size: CGSize) {

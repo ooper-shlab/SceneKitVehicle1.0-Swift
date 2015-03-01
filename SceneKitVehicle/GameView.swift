@@ -29,7 +29,7 @@ class GameView: SCNView {
         // retrieve the list of point of views
         let pointOfViews = scene!.rootNode.childNodesPassingTest {child, stop in
             return child.camera != nil
-            } as [SCNNode]
+            } as! [SCNNode]
         
         let currentPointOfView = self.pointOfView
         
@@ -49,8 +49,8 @@ class GameView: SCNView {
         SCNTransaction.commit()
     }
     
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent) {
-        let touch = touches.anyObject() as UITouch
+    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
+        let touch = touches.first as! UITouch
         
         //test if we hit the camera button
         let scene = overlaySKScene
@@ -71,7 +71,7 @@ class GameView: SCNView {
         touchCount = allTouches!.count
     }
     
-    override func touchesEnded(touches: NSSet, withEvent event: UIEvent) {
+    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
         touchCount = 0
     }
     
