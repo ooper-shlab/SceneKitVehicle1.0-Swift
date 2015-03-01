@@ -20,7 +20,7 @@ import CoreMotion
 import SpriteKit
 import SceneKit
 import GameController
-import simd
+//import simd
 
 //--Global constants
 let π = M_PI
@@ -86,10 +86,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
         
         if My.deviceName == nil {
-            let systemInfoPtr = UnsafeMutablePointer<utsname>.alloc(1)
-            uname(systemInfoPtr)
-            My.deviceName = String.fromCString(&systemInfoPtr.memory.machine.0)
-            systemInfoPtr.dealloc(1)
+            var systemInfo = utsname()
+            uname(&systemInfo)
+            My.deviceName = String.fromCString(&systemInfo.machine.0)
         }
         return My.deviceName!
     }
@@ -148,8 +147,8 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let trainScene = SCNScene(named: "train_flat")!
         
         //physicalize the train with simple boxes
-        (trainScene.rootNode.childNodes as NSArray).enumerateObjectsUsingBlock {obj, idx, stop in
-            let node = obj as! SCNNode
+        for node in trainScene.rootNode.childNodes as! [SCNNode] {
+            //let node = obj as! SCNNode
             if node.geometry != nil {
                 node.position = SCNVector3Make(node.position.x + pos.x, node.position.y + pos.y, node.position.z + pos.z)
                 
