@@ -2,8 +2,6 @@ SceneKitVehicle
 
 Translated by OOPer in cooperation with shlab.jp, on 2015/2/15.
 
-Adapted to Swift 1.2 beta2 on 2015/3/1.
-
 Based on
 https://developer.apple.com/library/ios/samplecode/SceneKitVehicle/Introduction/Intro.html#//apple_ref/doc/uid/TP40014549
 2014-09-17.
@@ -16,4 +14,4 @@ You should not contact to Apple or SHLab(jp) about any faults caused by my trans
 
 ### Build
 
-iOS 8.3 SDK, Xcode 6.3 beta2
+iOS 8.3 SDK, Xcode 6.3
