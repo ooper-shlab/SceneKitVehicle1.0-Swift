@@ -29,12 +29,12 @@ class GameView: SCNView {
         // retrieve the list of point of views
         let pointOfViews = scene!.rootNode.childNodesPassingTest {child, stop in
             return child.camera != nil
-            } as! [SCNNode]
+            } as [SCNNode]
         
         let currentPointOfView = self.pointOfView
         
         // select the next one
-        var index = find(pointOfViews, currentPointOfView!) ?? 0
+        var index = pointOfViews.indexOf(currentPointOfView!) ?? 0
         index++
         if index >= pointOfViews.count {
             index = 0
@@ -49,14 +49,14 @@ class GameView: SCNView {
         SCNTransaction.commit()
     }
     
-    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
-        let touch = touches.first as! UITouch
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        let touch = touches.first!
         
         //test if we hit the camera button
         let scene = overlaySKScene
         var p = touch.locationInView(self)
-        p = scene.convertPointFromView(p)
-        let node = scene.nodeAtPoint(p)
+        p = scene!.convertPointFromView(p)
+        let node = scene!.nodeAtPoint(p)
         
         if node.name != nil && node.name == "camera" {
             //play a sound
@@ -67,11 +67,11 @@ class GameView: SCNView {
         }
         
         //update the total number of touches on screen
-        let allTouches = event.allTouches()
+        let allTouches = event!.allTouches()
         touchCount = allTouches!.count
     }
     
-    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent) {
+    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
         touchCount = 0
     }
     

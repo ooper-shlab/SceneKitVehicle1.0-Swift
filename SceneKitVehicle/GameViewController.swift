@@ -20,43 +20,13 @@ import CoreMotion
 import SpriteKit
 import SceneKit
 import GameController
-//import simd
+import simd
 
 //--Global constants
 let π = M_PI
 let π_2 = M_PI_2
 let π_4 = M_PI_4
-//--Global operator
-typealias Float3 = (Float, Float, Float)
-func +(lhs: SCNVector3, rhs: Float3) -> SCNVector3 {
-    return SCNVector3Make(lhs.x + rhs.0, lhs.y + rhs.1, lhs.z + rhs.2)
-}
-func -(lhs: SCNVector3, rhs: Float3) -> SCNVector3 {
-    return SCNVector3Make(lhs.x - rhs.0, lhs.y - rhs.1, lhs.z - rhs.2)
-}
-//--Alternate for vector_mix
-func mix(x:Float3, y:Float3, t:Float) -> Float3 {
-    return x + (y - x) * t
-}
-func +(lhs:Float3, rhs:Float3) -> Float3 {
-    return (lhs.0 + rhs.0, lhs.1 + rhs.1, lhs.2 + rhs.2)
-}
-func -(lhs:Float3, rhs:Float3) -> Float3 {
-    return (lhs.0 - rhs.0, lhs.1 - rhs.1, lhs.2 - rhs.2)
-}
-func *(lhs:Float3, rhs:Float) -> Float3 {
-    return (lhs.0 * rhs, lhs.1 * rhs, lhs.2 * rhs)
-}
-extension SCNVector3 {
-    init(_ f3: Float3) {
-        self.x = f3.0
-        self.y = f3.1
-        self.z = f3.2
-    }
-    var toFloat3: Float3 {
-        return (self.x, self.y, self.z)
-    }
-}
+
 @objc(AAPLGameViewController)
 class GameViewController: UIViewController, SCNSceneRendererDelegate {
     
@@ -147,7 +117,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let trainScene = SCNScene(named: "train_flat")!
         
         //physicalize the train with simple boxes
-        for node in trainScene.rootNode.childNodes as! [SCNNode] {
+        for node in trainScene.rootNode.childNodes as [SCNNode] {
             //let node = obj as! SCNNode
             if node.geometry != nil {
                 node.position = SCNVector3Make(node.position.x + pos.x, node.position.y + pos.y, node.position.z + pos.z)
@@ -167,7 +137,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         //add smoke
         let smokeHandle = scene.rootNode.childNodeWithName("Smoke", recursively: true)
-        smokeHandle!.addParticleSystem(SCNParticleSystem(named: "smoke", inDirectory: nil))
+        smokeHandle!.addParticleSystem(SCNParticleSystem(named: "smoke", inDirectory: nil)!)
         
         //add physics constraints between engine and wagons
         let engineCar = scene.rootNode.childNodeWithName("EngineCar", recursively: false)
@@ -181,13 +151,13 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         wagon1!.getBoundingBoxMin(&wmin, max: &wmax)
         
         // Tie EngineCar & Wagon1
-        var joint = SCNPhysicsBallSocketJoint(bodyA: engineCar!.physicsBody, anchorA: SCNVector3Make(max.x, min.y, 0),
-            bodyB: wagon1!.physicsBody, anchorB: SCNVector3Make(wmin.x, wmin.y, 0))
+        var joint = SCNPhysicsBallSocketJoint(bodyA: engineCar!.physicsBody!, anchorA: SCNVector3Make(max.x, min.y, 0),
+            bodyB: wagon1!.physicsBody!, anchorB: SCNVector3Make(wmin.x, wmin.y, 0))
         scene.physicsWorld.addBehavior(joint)
         
         // Wagon1 & Wagon2
-        joint = SCNPhysicsBallSocketJoint(bodyA: wagon1!.physicsBody, anchorA: SCNVector3Make(wmax.x + 0.1, wmin.y, 0),
-            bodyB: wagon2!.physicsBody, anchorB: SCNVector3Make(wmin.x - 0.1, wmin.y, 0))
+        joint = SCNPhysicsBallSocketJoint(bodyA: wagon1!.physicsBody!, anchorA: SCNVector3Make(wmax.x + 0.1, wmin.y, 0),
+            bodyB: wagon2!.physicsBody!, anchorB: SCNVector3Make(wmin.x - 0.1, wmin.y, 0))
         scene.physicsWorld.addBehavior(joint)
     }
     
@@ -239,12 +209,12 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         wall.physicsBody = SCNPhysicsBody.staticBody()
         scene.rootNode.addChildNode(wall)
         
-        let wallC = wall.clone() as! SCNNode
+        let wallC = wall.clone() as SCNNode
         wallC.position = SCNVector3Make(-202, 50, 0)
         wallC.rotation = SCNVector4Make(0, 1, 0, Float(π_2))
         scene.rootNode.addChildNode(wallC)
         
-        let wallD = wall.clone() as! SCNNode
+        let wallD = wall.clone() as SCNNode
         wallD.position = SCNVector3Make(202, 50, 0)
         wallD.rotation = SCNVector4Make(0, 1, 0, Float(-π_2))
         scene.rootNode.addChildNode(wallD)
@@ -340,10 +310,10 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         pipeNode!.addParticleSystem(_reactor)
         
         //add wheels
-        let wheel0Node = chassisNode!.childNodeWithName("wheelLocator_FL", recursively: true)
-        let wheel1Node = chassisNode!.childNodeWithName("wheelLocator_FR", recursively: true)
-        let wheel2Node = chassisNode!.childNodeWithName("wheelLocator_RL", recursively: true)
-        let wheel3Node = chassisNode!.childNodeWithName("wheelLocator_RR", recursively: true)
+        let wheel0Node = chassisNode!.childNodeWithName("wheelLocator_FL", recursively: true)!
+        let wheel1Node = chassisNode!.childNodeWithName("wheelLocator_FR", recursively: true)!
+        let wheel2Node = chassisNode!.childNodeWithName("wheelLocator_RL", recursively: true)!
+        let wheel3Node = chassisNode!.childNodeWithName("wheelLocator_RR", recursively: true)!
         
         let wheel0 = SCNPhysicsVehicleWheel(node: wheel0Node)
         let wheel1 = SCNPhysicsVehicleWheel(node: wheel1Node)
@@ -351,16 +321,16 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let wheel3 = SCNPhysicsVehicleWheel(node: wheel3Node)
         
         var min = SCNVector3Zero, max = SCNVector3Zero
-        wheel0Node!.getBoundingBoxMin(&min, max: &max)
+        wheel0Node.getBoundingBoxMin(&min, max: &max)
         let wheelHalfWidth = Float(0.5 * (max.x - min.x))
         
-        wheel0.connectionPosition = wheel0Node!.convertPosition(SCNVector3Zero, toNode: chassisNode) + (wheelHalfWidth, 0, 0)
-        wheel1.connectionPosition = wheel1Node!.convertPosition(SCNVector3Zero, toNode: chassisNode) - (wheelHalfWidth, 0, 0)
-        wheel2.connectionPosition = wheel2Node!.convertPosition(SCNVector3Zero, toNode: chassisNode) + (wheelHalfWidth, 0, 0)
-        wheel3.connectionPosition = wheel3Node!.convertPosition(SCNVector3Zero, toNode: chassisNode) - (wheelHalfWidth, 0, 0)
+        wheel0.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel0Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) + float3(wheelHalfWidth, 0, 0))
+        wheel1.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel1Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) - float3(wheelHalfWidth, 0, 0))
+        wheel2.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel2Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) + float3(wheelHalfWidth, 0, 0))
+        wheel3.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel3Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) - float3(wheelHalfWidth, 0, 0))
         
         // create the physics vehicle
-        let vehicle = SCNPhysicsVehicle(chassisBody: chassisNode!.physicsBody, wheels: [wheel0, wheel1, wheel2, wheel3])
+        let vehicle = SCNPhysicsVehicle(chassisBody: chassisNode!.physicsBody!, wheels: [wheel0, wheel1, wheel2, wheel3])
         scene.physicsWorld.addBehavior(vehicle)
         
         _vehicle = vehicle
@@ -409,7 +379,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         if GCController.controllers().count == 0 && _motionManager.accelerometerAvailable {
             _motionManager.accelerometerUpdateInterval = 1/60.0
             _motionManager.startAccelerometerUpdatesToQueue(NSOperationQueue.mainQueue()) {[weak self] accelerometerData, error in
-                self!.accelerometerDidChange(accelerometerData.acceleration)
+                self!.accelerometerDidChange(accelerometerData!.acceleration)
             }
         }
     }
@@ -506,9 +476,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
         
         //controller support
-        if controllers != nil && controllers.count > 0 {
-            let controller = controllers[0] as! GCController
-            let pad = controller.gamepad
+        if !controllers.isEmpty {
+            let controller = controllers[0] as GCController
+            let pad = controller.gamepad!
             let dpad = pad.dpad
             
             struct My {
@@ -582,10 +552,10 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         // make camera follow the car node
         let car = _vehicleNode.presentationNode()
         let carPos = car.position
-        let targetPos = (carPos.x, Float(30), carPos.z + 25)
-        var cameraPos = _cameraNode.position.toFloat3
-        cameraPos = mix(cameraPos, targetPos, Float(cameraDamping))
-        _cameraNode.position = SCNVector3(cameraPos)
+        let targetPos = float3(carPos.x, Float(30), carPos.z + 25)
+        var cameraPos = SCNVector3ToFloat3(_cameraNode.position)
+        cameraPos = mix(cameraPos, targetPos, t: Float(cameraDamping))
+        _cameraNode.position = SCNVector3FromFloat3(cameraPos)
         
         if scnView.inCarView {
             //move spot light in front of the camera
@@ -611,7 +581,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         struct My {
             static var ticks = 0
             static var check = 0
-            static var try = 0
+            static var `try` = 0
         }
         func randf() -> Float {
             return Float(rand())
@@ -622,9 +592,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             if t.m22 <= 0.1 {
                 My.check++
                 if My.check == 3 {
-                    My.try++
-                    if My.try == 3 {
-                        My.try = 0
+                    My.`try`++
+                    if My.`try` == 3 {
+                        My.`try` = 0
                         
                         //hard reset
                         _vehicleNode.rotation = SCNVector4Make(0, 0, 0, 0)
@@ -670,8 +640,8 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         return true
     }
     
-    override func supportedInterfaceOrientations() -> Int {
-        return Int(UIInterfaceOrientationMask.Landscape.rawValue)
+    override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.Landscape
     }
     
     override func didReceiveMemoryWarning() {

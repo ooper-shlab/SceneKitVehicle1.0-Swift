@@ -100,6 +100,8 @@
 		D75EB98E1A9075210039D093 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		D75EB98F1A9075210039D093 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D75EB9921A90756B0039D093 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
+		D7B16C121B492DAD00D0A11C /* AAPLGameViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AAPLGameViewController.h; sourceTree = "<group>"; };
+		D7B16C131B492DAD00D0A11C /* AAPLGameViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AAPLGameViewController.m; sourceTree = "<group>"; };
 		D7D7D2BA19A034B20065D098 /* OverlayScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverlayScene.swift; sourceTree = "<group>"; };
 		D7D7D2EA19A0CA7D0065D098 /* GameView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		D7D7D2EC19A0CEE90065D098 /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -196,6 +198,8 @@
 		9461831418F08C1D00FDFE48 /* SceneKitVehicle */ = {
 			isa = PBXGroup;
 			children = (
+				D7B16C121B492DAD00D0A11C /* AAPLGameViewController.h */,
+				D7B16C131B492DAD00D0A11C /* AAPLGameViewController.m */,
 				D75314A919B795110021B0F8 /* AppDelegate.swift */,
 				D7D7D2EC19A0CEE90065D098 /* GameViewController.swift */,
 				D7D7D2EA19A0CA7D0065D098 /* GameView.swift */,
@@ -244,7 +248,8 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = AAPL;
-				LastUpgradeCheck = 0600;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Apple Inc.";
 			};
 			buildConfigurationList = 9461830D18F08C1D00FDFE48 /* Build configuration list for PBXProject "SceneKitVehicle" */;
@@ -372,6 +377,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -440,6 +446,7 @@
 				GCC_PREFIX_HEADER = "SceneKitVehicle/SceneKitVehicle-Prefix.pch";
 				INFOPLIST_FILE = "SceneKitVehicle/SceneKitVehicle-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.scenekit.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos.internal;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -458,6 +465,7 @@
 				GCC_PREFIX_HEADER = "SceneKitVehicle/SceneKitVehicle-Prefix.pch";
 				INFOPLIST_FILE = "SceneKitVehicle/SceneKitVehicle-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.apple.scenekit.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos.internal;
 			};
