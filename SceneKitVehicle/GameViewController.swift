@@ -550,7 +550,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         reorientCarIfNeeded()
         
         // make camera follow the car node
-        let car = _vehicleNode.presentationNode()
+        let car = _vehicleNode.presentationNode
         let carPos = car.position
         let targetPos = float3(carPos.x, Float(30), carPos.z + 25)
         var cameraPos = SCNVector3ToFloat3(_cameraNode.position)
@@ -559,7 +559,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         if scnView.inCarView {
             //move spot light in front of the camera
-            let frontPosition = scnView.pointOfView!.presentationNode().convertPosition(SCNVector3Make(0, 0, -30), toNode:nil)
+            let frontPosition = scnView.pointOfView!.presentationNode.convertPosition(SCNVector3Make(0, 0, -30), toNode:nil)
             _spotLightNode.position = SCNVector3Make(frontPosition.x, 80, frontPosition.z)
             _spotLightNode.rotation = SCNVector4Make(1,0,0,-Float(π/2))
         } else {
@@ -574,7 +574,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     }
     
     private func reorientCarIfNeeded() {
-        let car = _vehicleNode.presentationNode()
+        let car = _vehicleNode.presentationNode
         let carPos = car.position
         
         // make sure the car isn't upside down, and fix it if it is
