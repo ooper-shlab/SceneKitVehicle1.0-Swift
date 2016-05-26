@@ -420,7 +420,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         scnView.delegate = self
         
         
-        let doubleTap = UITapGestureRecognizer(target: self, action: "handleDoubleTap:")
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(GameViewController.handleDoubleTap(_:)))
         doubleTap.numberOfTapsRequired = 2
         doubleTap.numberOfTouchesRequired = 2
         scnView.gestureRecognizers = [doubleTap]
@@ -586,13 +586,13 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         func randf() -> Float {
             return Float(rand())
         }
-        My.ticks++
+        My.ticks += 1
         if My.ticks == 30 {
             let t = car.worldTransform
             if t.m22 <= 0.1 {
-                My.check++
+                My.check += 1
                 if My.check == 3 {
-                    My.`try`++
+                    My.`try` += 1
                     if My.`try` == 3 {
                         My.`try` = 0
                         

@@ -35,7 +35,7 @@ class GameView: SCNView {
         
         // select the next one
         var index = pointOfViews.indexOf(currentPointOfView!) ?? 0
-        index++
+        index += 1
         if index >= pointOfViews.count {
             index = 0
         }
