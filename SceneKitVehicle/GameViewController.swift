@@ -41,7 +41,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     
     //accelerometer
     private var _motionManager: CMMotionManager!
-    private var _accelerometer = [UIAccelerationValue](count: 3, repeatedValue: 0.0)
+    private var _accelerometer = [UIAccelerationValue](repeating: 0.0, count: 3)
     private var _orientation: CGFloat = 0.0
     
     //reactor's particle birth rate
@@ -50,38 +50,33 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     // steering factor
     private var _vehicleSteering: CGFloat = 0.0
     
-    private func deviceName() -> String {
-        struct My {
-            static var deviceName: String? = nil
+    private lazy var deviceName: String = {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        return withUnsafePointer(to: &systemInfo.machine) {machinePtr in
+            String(cString: UnsafeRawPointer(machinePtr).assumingMemoryBound(to: CChar.self))
         }
-        
-        if My.deviceName == nil {
-            var systemInfo = utsname()
-            uname(&systemInfo)
-            My.deviceName = String.fromCString(&systemInfo.machine.0)
-        }
-        return My.deviceName!
-    }
+    }()
     
     private var isHighEndDevice: Bool {
         //return YES for iPhone 5s and iPad air, NO otherwise
-        return deviceName().hasPrefix("iPad4")
-            || deviceName().hasPrefix("iPhone6")
+        return deviceName.hasPrefix("iPad4")
+            || deviceName.hasPrefix("iPhone6")
         
     }
     
-    private func setupEnvironment(scene: SCNScene) {
+    private func setupEnvironment(_ scene: SCNScene) {
         // add an ambient light
         let ambientLight = SCNNode()
         ambientLight.light = SCNLight()
-        ambientLight.light!.type = SCNLightTypeAmbient
+        ambientLight.light!.type = SCNLight.LightType.ambient
         ambientLight.light!.color = UIColor(white: 0.3, alpha: 1.0)
         scene.rootNode.addChildNode(ambientLight)
         
         //add a key light to the scene
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
-        lightNode.light!.type = SCNLightTypeSpot
+        lightNode.light!.type = SCNLight.LightType.spot
         if isHighEndDevice {
             lightNode.light!.castsShadow = true
         }
@@ -90,7 +85,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         lightNode.rotation = SCNVector4Make(1, 0, 0, Float(-M_PI/2.8))
         lightNode.light!.spotInnerAngle = 0
         lightNode.light!.spotOuterAngle = 50
-        lightNode.light!.shadowColor = SKColor.blackColor()
+        lightNode.light!.shadowColor = SKColor.black
         lightNode.light!.zFar = 500
         lightNode.light!.zNear = 50
         scene.rootNode.addChildNode(lightNode)
@@ -108,12 +103,12 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             (floor.geometry as! SCNFloor).reflectionFalloffEnd = 10
         }
         
-        let staticBody = SCNPhysicsBody.staticBody()
+        let staticBody = SCNPhysicsBody.static()
         floor.physicsBody = staticBody
         scene.rootNode.addChildNode(floor)
     }
     
-    private func addTrainToScene(scene: SCNScene, atPosition pos: SCNVector3) {
+    private func addTrainToScene(_ scene: SCNScene, atPosition pos: SCNVector3) {
         let trainScene = SCNScene(named: "train_flat")!
         
         //physicalize the train with simple boxes
@@ -122,10 +117,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             if node.geometry != nil {
                 node.position = SCNVector3Make(node.position.x + pos.x, node.position.y + pos.y, node.position.z + pos.z)
                 
-                var min = SCNVector3Zero, max = SCNVector3Zero
-                node.getBoundingBoxMin(&min, max: &max)
+                let (min, max) = node.boundingBox
                 
-                let body = SCNPhysicsBody.dynamicBody()
+                let body = SCNPhysicsBody.dynamic()
                 let boxShape = SCNBox(width:CGFloat(max.x - min.x), height:CGFloat(max.y - min.y), length:CGFloat(max.z - min.z), chamferRadius:0.0)
                 body.physicsShape = SCNPhysicsShape(geometry: boxShape, options:nil)
                 
@@ -136,33 +130,31 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
         
         //add smoke
-        let smokeHandle = scene.rootNode.childNodeWithName("Smoke", recursively: true)
+        let smokeHandle = scene.rootNode.childNode(withName: "Smoke", recursively: true)
         smokeHandle!.addParticleSystem(SCNParticleSystem(named: "smoke", inDirectory: nil)!)
         
         //add physics constraints between engine and wagons
-        let engineCar = scene.rootNode.childNodeWithName("EngineCar", recursively: false)
-        let wagon1 = scene.rootNode.childNodeWithName("Wagon1", recursively: false)
-        let wagon2 = scene.rootNode.childNodeWithName("Wagon2", recursively: false)
+        let engineCar = scene.rootNode.childNode(withName: "EngineCar", recursively: false)
+        let wagon1 = scene.rootNode.childNode(withName: "Wagon1", recursively: false)
+        let wagon2 = scene.rootNode.childNode(withName: "Wagon2", recursively: false)
         
-        var min = SCNVector3Zero, max = SCNVector3Zero
-        engineCar!.getBoundingBoxMin(&min, max: &max)
+        let (min, max) = engineCar!.boundingBox
         
-        var wmin = SCNVector3Zero, wmax = SCNVector3Zero
-        wagon1!.getBoundingBoxMin(&wmin, max: &wmax)
+        let (wmin, wmax) = wagon1!.boundingBox
         
         // Tie EngineCar & Wagon1
         var joint = SCNPhysicsBallSocketJoint(bodyA: engineCar!.physicsBody!, anchorA: SCNVector3Make(max.x, min.y, 0),
-            bodyB: wagon1!.physicsBody!, anchorB: SCNVector3Make(wmin.x, wmin.y, 0))
+                                              bodyB: wagon1!.physicsBody!, anchorB: SCNVector3Make(wmin.x, wmin.y, 0))
         scene.physicsWorld.addBehavior(joint)
         
         // Wagon1 & Wagon2
         joint = SCNPhysicsBallSocketJoint(bodyA: wagon1!.physicsBody!, anchorA: SCNVector3Make(wmax.x + 0.1, wmin.y, 0),
-            bodyB: wagon2!.physicsBody!, anchorB: SCNVector3Make(wmin.x - 0.1, wmin.y, 0))
+                                          bodyB: wagon2!.physicsBody!, anchorB: SCNVector3Make(wmin.x - 0.1, wmin.y, 0))
         scene.physicsWorld.addBehavior(joint)
     }
     
     
-    private func addWoodenBlockToScene(scene:SCNScene, withImageNamed imageName:NSString, atPosition position:SCNVector3) {
+    private func addWoodenBlockToScene(_ scene:SCNScene, withImageNamed imageName:NSString, atPosition position:SCNVector3) {
         //create a new node
         let block = SCNNode()
         
@@ -176,16 +168,16 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         block.geometry!.firstMaterial!.diffuse.contents = imageName
         
         //turn on mipmapping
-        block.geometry!.firstMaterial!.diffuse.mipFilter = .Linear
+        block.geometry!.firstMaterial!.diffuse.mipFilter = .linear
         
         //make it physically based
-        block.physicsBody = SCNPhysicsBody.dynamicBody()
+        block.physicsBody = SCNPhysicsBody.dynamic()
         
         //add to the scene
         scene.rootNode.addChildNode(block)
     }
     
-    private func setupSceneElements(scene: SCNScene) {
+    private func setupSceneElements(_ scene: SCNScene) {
         // add a train
         addTrainToScene(scene, atPosition: SCNVector3Make(-5, 20, -40))
         
@@ -199,22 +191,22 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let wall = SCNNode(geometry: SCNBox(width: 400, height: 100, length: 4, chamferRadius: 0))
         wall.geometry!.firstMaterial!.diffuse.contents = "wall.jpg"
         wall.geometry!.firstMaterial!.diffuse.contentsTransform = SCNMatrix4Mult(SCNMatrix4MakeScale(24, 2, 1), SCNMatrix4MakeTranslation(0, 1, 0))
-        wall.geometry!.firstMaterial!.diffuse.wrapS = .Repeat
-        wall.geometry!.firstMaterial!.diffuse.wrapT = .Mirror
-        wall.geometry!.firstMaterial!.doubleSided = false
+        wall.geometry!.firstMaterial!.diffuse.wrapS = .repeat
+        wall.geometry!.firstMaterial!.diffuse.wrapT = .mirror
+        wall.geometry!.firstMaterial!.isDoubleSided = false
         wall.castsShadow = false
         wall.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
         
         wall.position = SCNVector3Make(0, 50, -92)
-        wall.physicsBody = SCNPhysicsBody.staticBody()
+        wall.physicsBody = SCNPhysicsBody.static()
         scene.rootNode.addChildNode(wall)
         
-        let wallC = wall.clone() as SCNNode
+        let wallC = wall.clone()
         wallC.position = SCNVector3Make(-202, 50, 0)
         wallC.rotation = SCNVector4Make(0, 1, 0, Float(π_2))
         scene.rootNode.addChildNode(wallC)
         
-        let wallD = wall.clone() as SCNNode
+        let wallD = wall.clone()
         wallD.position = SCNVector3Make(202, 50, 0)
         wallD.rotation = SCNVector4Make(0, 1, 0, Float(-π_2))
         scene.rootNode.addChildNode(wallD)
@@ -224,23 +216,23 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         backWall.position = SCNVector3Make(0, 50, 200)
         backWall.rotation = SCNVector4Make(0, 1, 0, Float(π))
         backWall.castsShadow = false
-        backWall.physicsBody = SCNPhysicsBody.staticBody()
+        backWall.physicsBody = SCNPhysicsBody.static()
         scene.rootNode.addChildNode(backWall)
         
         // add ceil
         let ceilNode = SCNNode(geometry: SCNPlane(width: 400, height: 400))
         ceilNode.position = SCNVector3Make(0, 100, 0)
         ceilNode.rotation = SCNVector4Make(1, 0, 0, Float(π_2))
-        ceilNode.geometry!.firstMaterial!.doubleSided = false
+        ceilNode.geometry!.firstMaterial!.isDoubleSided = false
         ceilNode.castsShadow = false
         ceilNode.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
         scene.rootNode.addChildNode(ceilNode)
         
         //add more block
         for _ in 0 ..< 4 {
-            addWoodenBlockToScene(scene, withImageNamed: "WoodCubeA.jpg", atPosition: SCNVector3Make(Float(rand() % 60 - 30), 20, Float(rand() % 40 - 20)))
-            addWoodenBlockToScene(scene, withImageNamed: "WoodCubeB.jpg", atPosition: SCNVector3Make(Float(rand() % 60 - 30), 20, Float(rand() % 40 - 20)))
-            addWoodenBlockToScene(scene, withImageNamed: "WoodCubeC.jpg", atPosition: SCNVector3Make(Float(rand() % 60 - 30), 20, Float(rand() % 40 - 20)))
+            addWoodenBlockToScene(scene, withImageNamed: "WoodCubeA.jpg", atPosition: SCNVector3Make(Float(arc4random_uniform(60)) - 30, 20, Float(arc4random_uniform(40)) - 20))
+            addWoodenBlockToScene(scene, withImageNamed: "WoodCubeB.jpg", atPosition: SCNVector3Make(Float(arc4random_uniform(60)) - 30, 20, Float(arc4random_uniform(40)) - 20))
+            addWoodenBlockToScene(scene, withImageNamed: "WoodCubeC.jpg", atPosition: SCNVector3Make(Float(arc4random_uniform(60)) - 30, 20, Float(arc4random_uniform(40)) - 20))
         }
         
         // add cartoon book
@@ -251,20 +243,20 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let frontMat = SCNMaterial()
         frontMat.locksAmbientWithDiffuse = true
         frontMat.diffuse.contents = "book_front.jpg"
-        frontMat.diffuse.mipFilter = .Linear
+        frontMat.diffuse.mipFilter = .linear
         let backMat = SCNMaterial()
         backMat.locksAmbientWithDiffuse = true
         backMat.diffuse.contents = "book_back.jpg"
-        backMat.diffuse.mipFilter = .Linear
+        backMat.diffuse.mipFilter = .linear
         block.geometry!.materials = [frontMat, backMat]
-        block.physicsBody = SCNPhysicsBody.dynamicBody()
+        block.physicsBody = SCNPhysicsBody.dynamic()
         scene.rootNode.addChildNode(block)
         
         // add carpet
         let rug = SCNNode()
         rug.position = SCNVector3Make(0, 0.01, 0)
         rug.rotation = SCNVector4Make(1, 0, 0, Float(π_2))
-        let path = UIBezierPath(roundedRect: CGRectMake(-50, -30, 100, 50), cornerRadius: 2.5)
+        let path = UIBezierPath(roundedRect: CGRect(x: -50, y: -30, width: 100, height: 50), cornerRadius: 2.5)
         path.flatness = 0.1
         rug.geometry = SCNShape(path: path, extrusionDepth: 0.05)
         rug.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
@@ -278,22 +270,22 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         ball.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
         ball.geometry!.firstMaterial!.diffuse.contents = "ball.jpg"
         ball.geometry!.firstMaterial!.diffuse.contentsTransform = SCNMatrix4MakeScale(2, 1, 1)
-        ball.geometry!.firstMaterial!.diffuse.wrapS = .Mirror
-        ball.physicsBody = SCNPhysicsBody.dynamicBody()
+        ball.geometry!.firstMaterial!.diffuse.wrapS = .mirror
+        ball.physicsBody = SCNPhysicsBody.dynamic()
         ball.physicsBody!.restitution = 0.9
         scene.rootNode.addChildNode(ball)
     }
     
     
-    private func setupVehicle(scene: SCNScene) -> SCNNode {
+    private func setupVehicle(_ scene: SCNScene) -> SCNNode {
         let carScene = SCNScene(named: "rc_car")!
-        let chassisNode = carScene.rootNode.childNodeWithName("rccarBody", recursively: false)
+        let chassisNode = carScene.rootNode.childNode(withName: "rccarBody", recursively: false)
         
         // setup the chassis
         chassisNode!.position = SCNVector3Make(0, 10, 30)
         chassisNode!.rotation = SCNVector4Make(0, 1, 0, Float(π))
         
-        let body = SCNPhysicsBody.dynamicBody()
+        let body = SCNPhysicsBody.dynamic()
         body.allowsResting = false
         body.mass = 80
         body.restitution = 0.1
@@ -303,31 +295,30 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         chassisNode!.physicsBody = body
         scene.rootNode.addChildNode(chassisNode!)
         
-        let pipeNode = chassisNode!.childNodeWithName("pipe", recursively: true)
+        let pipeNode = chassisNode!.childNode(withName: "pipe", recursively: true)
         _reactor = SCNParticleSystem(named: "reactor", inDirectory: nil)
         _reactorDefaultBirthRate = _reactor.birthRate
         _reactor.birthRate = 0
         pipeNode!.addParticleSystem(_reactor)
         
         //add wheels
-        let wheel0Node = chassisNode!.childNodeWithName("wheelLocator_FL", recursively: true)!
-        let wheel1Node = chassisNode!.childNodeWithName("wheelLocator_FR", recursively: true)!
-        let wheel2Node = chassisNode!.childNodeWithName("wheelLocator_RL", recursively: true)!
-        let wheel3Node = chassisNode!.childNodeWithName("wheelLocator_RR", recursively: true)!
+        let wheel0Node = chassisNode!.childNode(withName: "wheelLocator_FL", recursively: true)!
+        let wheel1Node = chassisNode!.childNode(withName: "wheelLocator_FR", recursively: true)!
+        let wheel2Node = chassisNode!.childNode(withName: "wheelLocator_RL", recursively: true)!
+        let wheel3Node = chassisNode!.childNode(withName: "wheelLocator_RR", recursively: true)!
         
         let wheel0 = SCNPhysicsVehicleWheel(node: wheel0Node)
         let wheel1 = SCNPhysicsVehicleWheel(node: wheel1Node)
         let wheel2 = SCNPhysicsVehicleWheel(node: wheel2Node)
         let wheel3 = SCNPhysicsVehicleWheel(node: wheel3Node)
         
-        var min = SCNVector3Zero, max = SCNVector3Zero
-        wheel0Node.getBoundingBoxMin(&min, max: &max)
+        let (min, max) = wheel0Node.boundingBox
         let wheelHalfWidth = Float(0.5 * (max.x - min.x))
         
-        wheel0.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel0Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) + float3(wheelHalfWidth, 0, 0))
-        wheel1.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel1Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) - float3(wheelHalfWidth, 0, 0))
-        wheel2.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel2Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) + float3(wheelHalfWidth, 0, 0))
-        wheel3.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel3Node.convertPosition(SCNVector3Zero, toNode: chassisNode)) - float3(wheelHalfWidth, 0, 0))
+        wheel0.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel0Node.convertPosition(SCNVector3Zero, to: chassisNode)) + float3(wheelHalfWidth, 0, 0))
+        wheel1.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel1Node.convertPosition(SCNVector3Zero, to: chassisNode)) - float3(wheelHalfWidth, 0, 0))
+        wheel2.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel2Node.convertPosition(SCNVector3Zero, to: chassisNode)) + float3(wheelHalfWidth, 0, 0))
+        wheel3.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel3Node.convertPosition(SCNVector3Zero, to: chassisNode)) - float3(wheelHalfWidth, 0, 0))
         
         // create the physics vehicle
         let vehicle = SCNPhysicsVehicle(chassisBody: chassisNode!.physicsBody!, wheels: [wheel0, wheel1, wheel2, wheel3])
@@ -376,27 +367,27 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         //event
         _motionManager = CMMotionManager()
         
-        if GCController.controllers().count == 0 && _motionManager.accelerometerAvailable {
+        if GCController.controllers().count == 0 && _motionManager.isAccelerometerAvailable {
             _motionManager.accelerometerUpdateInterval = 1/60.0
-            _motionManager.startAccelerometerUpdatesToQueue(NSOperationQueue.mainQueue()) {[weak self] accelerometerData, error in
+            _motionManager.startAccelerometerUpdates(to: OperationQueue.main) {[weak self] accelerometerData, error in
                 self!.accelerometerDidChange(accelerometerData!.acceleration)
             }
         }
     }
     
-    override func prefersStatusBarHidden() -> Bool {
+    override var prefersStatusBarHidden : Bool {
         return true
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        UIApplication.sharedApplication().statusBarHidden = true
+        UIApplication.shared.isStatusBarHidden = true
         
         let scnView = view as! SCNView
         
         //set the background to back
-        scnView.backgroundColor = SKColor.blackColor()
+        scnView.backgroundColor = SKColor.black
         
         //setup the scene
         let scene = setupScene()
@@ -428,7 +419,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         super.viewDidLoad()
     }
     
-    func handleDoubleTap(gesture: UITapGestureRecognizer) {
+    func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
         let scene = setupScene()
         
         let scnView = view as! SCNView
@@ -445,7 +436,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     }
     
     // game logic
-    func renderer(aRenderer: SCNSceneRenderer, didSimulatePhysicsAtTime time: NSTimeInterval) {
+    func renderer(_ aRenderer: SCNSceneRenderer, didSimulatePhysicsAtTime time: TimeInterval) {
         let defaultEngineForce: CGFloat = 300.0
         let defaultBrakingForce: CGFloat = 3.0
         let steeringClamp: CGFloat = 0.6
@@ -488,7 +479,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             let INCR_ORIENTATION: CGFloat = 0.03
             let DECR_ORIENTATION: CGFloat = 0.8
             
-            if dpad.right.pressed {
+            if dpad.right.isPressed {
                 if My.orientationCum < 0 {
                     My.orientationCum *= DECR_ORIENTATION
                 }
@@ -496,7 +487,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
                 if My.orientationCum > 1 {
                     My.orientationCum = 1
                 }
-            } else if dpad.left.pressed {
+            } else if dpad.left.isPressed {
                 if My.orientationCum > 0 {
                     My.orientationCum *= DECR_ORIENTATION
                 }
@@ -510,13 +501,13 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             
             orientation = My.orientationCum
             
-            if pad.buttonX.pressed {
+            if pad.buttonX.isPressed {
                 engineForce = defaultEngineForce
                 _reactor.birthRate = _reactorDefaultBirthRate
-            } else if pad.buttonA.pressed {
+            } else if pad.buttonA.isPressed {
                 engineForce = -defaultEngineForce
                 _reactor.birthRate = 0
-            } else if pad.buttonB.pressed {
+            } else if pad.buttonB.isPressed {
                 brakingForce = 100
                 _reactor.birthRate = 0
             } else {
@@ -537,20 +528,20 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
         
         //update the vehicle steering and acceleration
-        _vehicle.setSteeringAngle(_vehicleSteering, forWheelAtIndex: 0)
-        _vehicle.setSteeringAngle(_vehicleSteering, forWheelAtIndex: 1)
+        _vehicle.setSteeringAngle(_vehicleSteering, forWheelAt: 0)
+        _vehicle.setSteeringAngle(_vehicleSteering, forWheelAt: 1)
         
-        _vehicle.applyEngineForce(engineForce, forWheelAtIndex: 2)
-        _vehicle.applyEngineForce(engineForce, forWheelAtIndex: 3)
+        _vehicle.applyEngineForce(engineForce, forWheelAt: 2)
+        _vehicle.applyEngineForce(engineForce, forWheelAt: 3)
         
-        _vehicle.applyBrakingForce(brakingForce, forWheelAtIndex: 2)
-        _vehicle.applyBrakingForce(brakingForce, forWheelAtIndex: 3)
+        _vehicle.applyBrakingForce(brakingForce, forWheelAt: 2)
+        _vehicle.applyBrakingForce(brakingForce, forWheelAt: 3)
         
         //check if the car is upside down
         reorientCarIfNeeded()
         
         // make camera follow the car node
-        let car = _vehicleNode.presentationNode
+        let car = _vehicleNode.presentation
         let carPos = car.position
         let targetPos = float3(carPos.x, Float(30), carPos.z + 25)
         var cameraPos = SCNVector3ToFloat3(_cameraNode.position)
@@ -559,7 +550,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         if scnView.inCarView {
             //move spot light in front of the camera
-            let frontPosition = scnView.pointOfView!.presentationNode.convertPosition(SCNVector3Make(0, 0, -30), toNode:nil)
+            let frontPosition = scnView.pointOfView!.presentation.convertPosition(SCNVector3Make(0, 0, -30), to:nil)
             _spotLightNode.position = SCNVector3Make(frontPosition.x, 80, frontPosition.z)
             _spotLightNode.rotation = SCNVector4Make(1,0,0,-Float(π/2))
         } else {
@@ -574,7 +565,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     }
     
     private func reorientCarIfNeeded() {
-        let car = _vehicleNode.presentationNode
+        let car = _vehicleNode.presentation
         let carPos = car.position
         
         // make sure the car isn't upside down, and fix it if it is
@@ -584,7 +575,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             static var `try` = 0
         }
         func randf() -> Float {
-            return Float(rand())
+            return Float(arc4random())/Float(UInt32.max)
         }
         My.ticks += 1
         if My.ticks == 30 {
@@ -592,9 +583,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             if t.m22 <= 0.1 {
                 My.check += 1
                 if My.check == 3 {
-                    My.`try` += 1
-                    if My.`try` == 3 {
-                        My.`try` = 0
+                    My.try += 1
+                    if My.try == 3 {
+                        My.try = 0
                         
                         //hard reset
                         _vehicleNode.rotation = SCNVector4Make(0, 0, 0, 0)
@@ -602,8 +593,8 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
                         _vehicleNode.physicsBody!.resetTransform()
                     } else {
                         //try to upturn with an random impulse
-                        let pos = SCNVector3Make(-10 * ((randf()/Float(RAND_MAX)) - 0.5), 0, -10 * ((randf()/Float(RAND_MAX)) - 0.5))
-                        _vehicleNode.physicsBody!.applyForce(SCNVector3Make(0, 300, 0), atPosition: pos, impulse: true)
+                        let pos = SCNVector3Make(-10 * (randf() - 0.5), 0, -10 * (randf() - 0.5))
+                        _vehicleNode.physicsBody!.applyForce(SCNVector3Make(0, 300, 0), at: pos, asImpulse: true)
                     }
                     
                     My.check = 0
@@ -616,7 +607,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
     }
     
-    private func accelerometerDidChange(acceleration: CMAcceleration) {
+    private func accelerometerDidChange(_ acceleration: CMAcceleration) {
         let kFilteringFactor = 0.5
         
         //Use a basic low-pass filter to only keep the gravity in the accelerometer values
@@ -631,17 +622,17 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         _motionManager.stopAccelerometerUpdates()
         _motionManager = nil
     }
     
-    override func shouldAutorotate() -> Bool {
+    override var shouldAutorotate : Bool {
         return true
     }
     
-    override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask {
-        return UIInterfaceOrientationMask.Landscape
+    override var supportedInterfaceOrientations : UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.landscape
     }
     
     override func didReceiveMemoryWarning() {
