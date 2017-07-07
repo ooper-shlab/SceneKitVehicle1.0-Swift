@@ -99,7 +99,7 @@
 		D75314A919B795110021B0F8 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D75EB98E1A9075210039D093 /* LICENSE.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
 		D75EB98F1A9075210039D093 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		D75EB9921A90756B0039D093 /* readme.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = readme.txt; sourceTree = "<group>"; };
+		D75EB9921A90756B0039D093 /* README2.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README2.md; sourceTree = "<group>"; };
 		D7D7D2BA19A034B20065D098 /* OverlayScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OverlayScene.swift; sourceTree = "<group>"; };
 		D7D7D2EA19A0CA7D0065D098 /* GameView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameView.swift; sourceTree = "<group>"; };
 		D7D7D2EC19A0CEE90065D098 /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
@@ -175,9 +175,9 @@
 		9461830918F08C1D00FDFE48 = {
 			isa = PBXGroup;
 			children = (
-				D75EB9921A90756B0039D093 /* readme.txt */,
 				D75EB98E1A9075210039D093 /* LICENSE.txt */,
 				D75EB98F1A9075210039D093 /* README.md */,
+				D75EB9921A90756B0039D093 /* README2.md */,
 				9461831418F08C1D00FDFE48 /* SceneKitVehicle */,
 				944CD35318F1D91500F4DCDA /* Resources */,
 				116C81FB192EAD9E0001FC16 /* Frameworks */,
@@ -249,7 +249,7 @@
 				ORGANIZATIONNAME = "Apple Inc.";
 				TargetAttributes = {
 					9461831118F08C1D00FDFE48 = {
-						LastSwiftMigration = 0820;
+						LastSwiftMigration = 0830;
 					};
 				};
 			};

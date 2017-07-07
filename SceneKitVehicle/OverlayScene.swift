@@ -50,7 +50,7 @@ class OverlayScene: SKScene {
         needle.anchorPoint = CGPoint(x: 0.5, y: 0)
         needle.xScale = 0.7
         needle.yScale = 0.7
-        needle.zRotation = CGFloat(π_2)
+        needle.zRotation = .pi/2
         needleHandle.addChild(needle)
         myImage.addChild(needleHandle)
         

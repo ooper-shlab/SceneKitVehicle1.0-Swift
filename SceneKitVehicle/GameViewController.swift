@@ -23,9 +23,9 @@ import GameController
 import simd
 
 //--Global constants
-let π = M_PI
-let π_2 = M_PI_2
-let π_4 = M_PI_4
+//let π = M_PI
+//let π_2 = M_PI_2
+//let π_4 = M_PI_4
 
 @objc(AAPLGameViewController)
 class GameViewController: UIViewController, SCNSceneRendererDelegate {
@@ -82,7 +82,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         }
         lightNode.light!.color = UIColor(white: 0.8, alpha: 1.0)
         lightNode.position = SCNVector3Make(0, 80, 30)
-        lightNode.rotation = SCNVector4Make(1, 0, 0, Float(-M_PI/2.8))
+        lightNode.rotation = SCNVector4Make(1, 0, 0, -Float.pi/2.8)
         lightNode.light!.spotInnerAngle = 0
         lightNode.light!.spotOuterAngle = 50
         lightNode.light!.shadowColor = SKColor.black
@@ -203,18 +203,18 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         let wallC = wall.clone()
         wallC.position = SCNVector3Make(-202, 50, 0)
-        wallC.rotation = SCNVector4Make(0, 1, 0, Float(π_2))
+        wallC.rotation = SCNVector4Make(0, 1, 0, .pi/2)
         scene.rootNode.addChildNode(wallC)
         
         let wallD = wall.clone()
         wallD.position = SCNVector3Make(202, 50, 0)
-        wallD.rotation = SCNVector4Make(0, 1, 0, Float(-π_2))
+        wallD.rotation = SCNVector4Make(0, 1, 0, -Float.pi/2)
         scene.rootNode.addChildNode(wallD)
         
         let backWall = SCNNode(geometry: SCNPlane(width: 400, height: 100))
         backWall.geometry!.firstMaterial = wall.geometry!.firstMaterial
         backWall.position = SCNVector3Make(0, 50, 200)
-        backWall.rotation = SCNVector4Make(0, 1, 0, Float(π))
+        backWall.rotation = SCNVector4Make(0, 1, 0, .pi)
         backWall.castsShadow = false
         backWall.physicsBody = SCNPhysicsBody.static()
         scene.rootNode.addChildNode(backWall)
@@ -222,7 +222,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         // add ceil
         let ceilNode = SCNNode(geometry: SCNPlane(width: 400, height: 400))
         ceilNode.position = SCNVector3Make(0, 100, 0)
-        ceilNode.rotation = SCNVector4Make(1, 0, 0, Float(π_2))
+        ceilNode.rotation = SCNVector4Make(1, 0, 0, .pi/2)
         ceilNode.geometry!.firstMaterial!.isDoubleSided = false
         ceilNode.castsShadow = false
         ceilNode.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
@@ -238,7 +238,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         // add cartoon book
         let block = SCNNode()
         block.position = SCNVector3Make(20, 10, -16)
-        block.rotation = SCNVector4Make(0, 1, 0, Float(-π_4))
+        block.rotation = SCNVector4Make(0, 1, 0, -Float.pi/4)
         block.geometry = SCNBox(width: 22, height: 0.2, length: 34, chamferRadius: 0)
         let frontMat = SCNMaterial()
         frontMat.locksAmbientWithDiffuse = true
@@ -255,7 +255,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         // add carpet
         let rug = SCNNode()
         rug.position = SCNVector3Make(0, 0.01, 0)
-        rug.rotation = SCNVector4Make(1, 0, 0, Float(π_2))
+        rug.rotation = SCNVector4Make(1, 0, 0, .pi/2)
         let path = UIBezierPath(roundedRect: CGRect(x: -50, y: -30, width: 100, height: 50), cornerRadius: 2.5)
         path.flatness = 0.1
         rug.geometry = SCNShape(path: path, extrusionDepth: 0.05)
@@ -283,7 +283,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         // setup the chassis
         chassisNode!.position = SCNVector3Make(0, 10, 30)
-        chassisNode!.rotation = SCNVector4Make(0, 1, 0, Float(π))
+        chassisNode!.rotation = SCNVector4Make(0, 1, 0, .pi)
         
         let body = SCNPhysicsBody.dynamic()
         body.allowsResting = false
@@ -347,13 +347,13 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         _cameraNode.camera = SCNCamera()
         _cameraNode.camera!.zFar = 500
         _cameraNode.position = SCNVector3Make(0, 60, 50)
-        _cameraNode.rotation  = SCNVector4Make(1, 0, 0, -Float(π_4) * 0.75)
+        _cameraNode.rotation  = SCNVector4Make(1, 0, 0, -Float.pi/4 * 0.75)
         scene.rootNode.addChildNode(_cameraNode)
         
         //add a secondary camera to the car
         let frontCameraNode = SCNNode()
         frontCameraNode.position = SCNVector3Make(0, 3.5, 2.5)
-        frontCameraNode.rotation = SCNVector4Make(0, 1, 0, Float(π))
+        frontCameraNode.rotation = SCNVector4Make(0, 1, 0, .pi)
         frontCameraNode.camera = SCNCamera()
         frontCameraNode.camera!.xFov = 75
         frontCameraNode.camera!.zFar = 500
@@ -552,16 +552,16 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
             //move spot light in front of the camera
             let frontPosition = scnView.pointOfView!.presentation.convertPosition(SCNVector3Make(0, 0, -30), to:nil)
             _spotLightNode.position = SCNVector3Make(frontPosition.x, 80, frontPosition.z)
-            _spotLightNode.rotation = SCNVector4Make(1,0,0,-Float(π/2))
+            _spotLightNode.rotation = SCNVector4Make(1,0,0,-Float.pi/2)
         } else {
             //move spot light on top of the car
             _spotLightNode.position = SCNVector3Make(carPos.x, 80, carPos.z + 30)
-            _spotLightNode.rotation = SCNVector4Make(1,0,0,-Float(π/2.8))
+            _spotLightNode.rotation = SCNVector4Make(1,0,0,-Float.pi/2.8)
         }
         
         //speed gauge
         let overlayScene = scnView.overlaySKScene as! OverlayScene
-        overlayScene.speedNeedle.zRotation = -(_vehicle.speedInKilometersPerHour * CGFloat(π) / MAX_SPEED)
+        overlayScene.speedNeedle.zRotation = -(_vehicle.speedInKilometersPerHour * .pi / MAX_SPEED)
     }
     
     private func reorientCarIfNeeded() {
