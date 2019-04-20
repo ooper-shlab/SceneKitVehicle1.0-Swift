@@ -53,7 +53,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     private lazy var deviceName: String = {
         var systemInfo = utsname()
         uname(&systemInfo)
-        return withUnsafePointer(to: &systemInfo.machine) {machinePtr in
+        return withUnsafePointer(to: systemInfo.machine) {machinePtr in
             String(cString: UnsafeRawPointer(machinePtr).assumingMemoryBound(to: CChar.self))
         }
     }()
@@ -62,7 +62,17 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         //return YES for iPhone 5s and iPad air, NO otherwise
         return deviceName.hasPrefix("iPad4")
             || deviceName.hasPrefix("iPhone6")
-        
+            //### Added later devices...
+            || deviceName.hasPrefix("iPad5")
+            || deviceName.hasPrefix("iPad6")
+            || deviceName.hasPrefix("iPad7")
+            || deviceName.hasPrefix("iPad8")
+            || deviceName.hasPrefix("iPhone7")
+            || deviceName.hasPrefix("iPhone8")
+            || deviceName.hasPrefix("iPhone9")
+            || deviceName.hasPrefix("iPhone10")
+            || deviceName.hasPrefix("iPhone11")
+
     }
     
     private func setupEnvironment(_ scene: SCNScene) {
@@ -95,7 +105,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         //floor
         let floor = SCNNode()
-        floor.geometry = SCNFloor() as SCNGeometry
+        floor.geometry = SCNFloor()
         floor.geometry!.firstMaterial!.diffuse.contents = "wood.png"
         floor.geometry!.firstMaterial!.diffuse.contentsTransform = SCNMatrix4MakeScale(2, 2, 1) //scale the wood texture
         floor.geometry!.firstMaterial!.locksAmbientWithDiffuse = true
@@ -112,7 +122,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let trainScene = SCNScene(named: "train_flat")!
         
         //physicalize the train with simple boxes
-        for node in trainScene.rootNode.childNodes as [SCNNode] {
+        for node in trainScene.rootNode.childNodes {
             //let node = obj as! SCNNode
             if node.geometry != nil {
                 node.position = SCNVector3Make(node.position.x + pos.x, node.position.y + pos.y, node.position.z + pos.z)
@@ -315,10 +325,10 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let (min, max) = wheel0Node.boundingBox
         let wheelHalfWidth = Float(0.5 * (max.x - min.x))
         
-        wheel0.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel0Node.convertPosition(SCNVector3Zero, to: chassisNode)) + float3(wheelHalfWidth, 0, 0))
-        wheel1.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel1Node.convertPosition(SCNVector3Zero, to: chassisNode)) - float3(wheelHalfWidth, 0, 0))
-        wheel2.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel2Node.convertPosition(SCNVector3Zero, to: chassisNode)) + float3(wheelHalfWidth, 0, 0))
-        wheel3.connectionPosition = SCNVector3FromFloat3(SCNVector3ToFloat3(wheel3Node.convertPosition(SCNVector3Zero, to: chassisNode)) - float3(wheelHalfWidth, 0, 0))
+        wheel0.connectionPosition = SCNVector3(float3(wheel0Node.convertPosition(SCNVector3Zero, to: chassisNode)) + float3(wheelHalfWidth, 0, 0))
+        wheel1.connectionPosition = SCNVector3(float3(wheel1Node.convertPosition(SCNVector3Zero, to: chassisNode)) - float3(wheelHalfWidth, 0, 0))
+        wheel2.connectionPosition = SCNVector3(float3(wheel2Node.convertPosition(SCNVector3Zero, to: chassisNode)) + float3(wheelHalfWidth, 0, 0))
+        wheel3.connectionPosition = SCNVector3(float3(wheel3Node.convertPosition(SCNVector3Zero, to: chassisNode)) - float3(wheelHalfWidth, 0, 0))
         
         // create the physics vehicle
         let vehicle = SCNPhysicsVehicle(chassisBody: chassisNode!.physicsBody!, wheels: [wheel0, wheel1, wheel2, wheel3])
@@ -411,7 +421,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         scnView.delegate = self
         
         
-        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(GameViewController.handleDoubleTap(_:)))
+        let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
         doubleTap.numberOfTapsRequired = 2
         doubleTap.numberOfTouchesRequired = 2
         scnView.gestureRecognizers = [doubleTap]
@@ -419,7 +429,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         super.viewDidLoad()
     }
     
-    func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+    @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
         let scene = setupScene()
         
         let scnView = view as! SCNView
@@ -468,7 +478,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         
         //controller support
         if !controllers.isEmpty {
-            let controller = controllers[0] as GCController
+            let controller = controllers[0]
             let pad = controller.gamepad!
             let dpad = pad.dpad
             
@@ -544,9 +554,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let car = _vehicleNode.presentation
         let carPos = car.position
         let targetPos = float3(carPos.x, Float(30), carPos.z + 25)
-        var cameraPos = SCNVector3ToFloat3(_cameraNode.position)
+        var cameraPos = float3(_cameraNode.position)
         cameraPos = mix(cameraPos, targetPos, t: Float(cameraDamping))
-        _cameraNode.position = SCNVector3FromFloat3(cameraPos)
+        _cameraNode.position = SCNVector3(cameraPos)
         
         if scnView.inCarView {
             //move spot light in front of the camera

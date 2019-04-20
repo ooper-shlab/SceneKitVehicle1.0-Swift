@@ -29,12 +29,12 @@ class GameView: SCNView {
         // retrieve the list of point of views
         let pointOfViews = scene!.rootNode.childNodes {child, stop in
             return child.camera != nil
-            } as [SCNNode]
+            }
         
         let currentPointOfView = self.pointOfView
         
         // select the next one
-        var index = pointOfViews.index(of: currentPointOfView!) ?? 0
+        var index = pointOfViews.firstIndex(of: currentPointOfView!) ?? 0
         index += 1
         if index >= pointOfViews.count {
             index = 0
